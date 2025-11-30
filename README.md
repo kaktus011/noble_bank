@@ -1,4 +1,4 @@
-# Noble Bank — Frontend (Demo)
+# Noble Bank — Frontend
 
 This is a minimal React frontend scaffold demonstrating:
 
@@ -29,10 +29,3 @@ npm run dev
 ## Notes
 
 - The demo uses `Posts` page which fetches posts from JSONPlaceholder.
-- To switch to `api-ninjas.com` you'd need an API key and adapt the hook.
-
-If you want, I can:
-- Add a Users page or Post details route
-- Convert to TypeScript
-- Wire up authentication or a real API
-

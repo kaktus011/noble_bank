@@ -13,7 +13,7 @@ export default function App() {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Noble Bank (UI Demo)
+            Noble Bank
           </Typography>
           <Button color="inherit" component={Link} to="/">
             Home
