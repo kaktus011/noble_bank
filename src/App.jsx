@@ -1,3 +1,4 @@
+import React from 'react'
 import { Routes, Route, Link } from 'react-router-dom'
 import Home from './pages/Home'
 import Posts from './pages/Posts'
@@ -11,10 +12,9 @@ export default function App() {
         position="static"
         color="transparent"
         elevation={0}
-        style={{
-          background: "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0)), url('/images/toolbar.jpg') center/cover no-repeat"
-        }}
-        className="text-white  border-white" >
+        className="relative text-white border-white bg-[url('/images/toolbar.jpg')] bg-center bg-cover bg-no-repeat">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/45 to-transparent" />
+
         <Toolbar>
           <Typography
             color="inherit"
@@ -23,6 +23,7 @@ export default function App() {
             className="flex-1 font-semibold tracking-wide drop-shadow" >
             Noble Bank
           </Typography>
+
           <Button
             color="inherit"
             variant="outlined"
@@ -31,6 +32,7 @@ export default function App() {
             className="mx-2 border-[1.5px] hover:bg-white/10" >
             Home
           </Button>
+
           <Button
             color="inherit"
             variant="outlined"
