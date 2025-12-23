@@ -4,21 +4,41 @@ import Home from './pages/Home'
 import Posts from './pages/Posts'
 import CardDetails from './pages/CardDetails'
 import { AppBar, Toolbar, Typography, Container, Button } from '@mui/material'
-import CssBaseline from '@mui/material/CssBaseline'
 
 export default function App() {
   return (
     <div className="min-h-screen">
-      <CssBaseline />
-      <AppBar position="static">
+      <AppBar
+        position="static"
+        color="transparent"
+        elevation={0}
+        className="relative text-white border-white bg-[url('/images/toolbar.jpg')] bg-center bg-cover bg-no-repeat">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/45 to-transparent" />
+
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography
+            color="inherit"
+            variant="h6"
+            component="div"
+            className="flex-1 font-semibold tracking-wide drop-shadow" >
             Noble Bank
           </Typography>
-          <Button color="inherit" component={Link} to="/">
+
+          <Button
+            color="inherit"
+            variant="outlined"
+            component={Link}
+            to="/"
+            className="mx-2 border-[1.5px] hover:bg-white/10" >
             Home
           </Button>
-          <Button color="inherit" component={Link} to="/posts">
+
+          <Button
+            color="inherit"
+            variant="outlined"
+            component={Link}
+            to="/posts"
+            className="mx-2 border-[1.5px] hover:bg-white/10" >
             Posts
           </Button>
         </Toolbar>
