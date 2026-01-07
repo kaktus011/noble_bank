@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Typography,
   Grid,
@@ -102,8 +101,8 @@ export default function Home() {
             <CardContent>
               <div className="flex items-center justify-between mb-4">
                 <Typography variant="h6">Your Cards</Typography>
-                <Button size="small" component={Link} to="/cards">
-                  Manage cards
+                <Button size="small" component={Link} to="/request-card">
+                  Request a new card
                 </Button>
               </div>
 
