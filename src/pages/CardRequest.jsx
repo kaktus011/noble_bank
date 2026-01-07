@@ -39,12 +39,18 @@ export default function CardRequest() {
             return
         }
 
-        if (isNaN(formData.limit) || Number(formData.limit) <= 0) {
-            setError('Please enter a valid limit amount')
+        const limit = Number(formData.limit)
+        if (Number.isNaN(limit) || limit < 100) {
+            setError('Please enter a valid limit amount greater than or equal to 100')
+            return
+        }
+        if (limit > 30000) {
+            setError('Maximum allowed limit is 30000')
             return
         }
 
         // Simulate successful submission
+        // TODO : Integrate with backend API
         setSubmitted(true)
         setTimeout(() => {
             navigate('/')
@@ -108,14 +114,19 @@ export default function CardRequest() {
 
                         <TextField
                             fullWidth
-                            label="Credit Limit"
+                            label={formData.cardType === 'debit' ? 'Spending Limit' : 'Credit Limit'}
                             name="limit"
                             type="number"
-                            placeholder="Enter desired credit limit"
+                            placeholder={
+                                formData.cardType === 'debit'
+                                    ? 'Enter desired spending limit'
+                                    : 'Enter desired credit limit'
+                            }
                             value={formData.limit}
                             onChange={handleChange}
                             variant="outlined"
-                            inputProps={{ step: '100', min: '0' }}
+                            helperText="Max limit 30000"
+                            inputProps={{ step: '100', min: '100', max: '30000' }}
                         />
 
                         <Box className="flex gap-4 pt-4">
