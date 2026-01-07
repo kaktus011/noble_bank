@@ -40,7 +40,15 @@ export default function CardRequest() {
         }
 
         const limit = Number(formData.limit)
-        if (Number.isNaN(limit) || limit < 100) {
+        if (Number.isNaN(limit)) {
+            setError('Please enter a valid numeric limit amount')
+            return
+        }
+        if (limit <= 0) {
+            setError('Please enter a positive limit amount')
+            return
+        }
+        if (limit < 100) {
             setError('Please enter a valid limit amount greater than or equal to €100')
             return
         }
