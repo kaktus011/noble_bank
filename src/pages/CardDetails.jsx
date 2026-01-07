@@ -33,8 +33,8 @@ export default function CardDetails() {
                         {card.type} — Expires {card.expiry}
                     </Typography>
 
-                    <Typography className="mb-2">Balance: ${Number(card.balance ?? 0).toFixed(2)}</Typography>
-                    <Typography className="mb-2">Limit: {card.limit ? `$${card.limit}` : '—'}</Typography>
+                      <Typography className="mb-2">Balance: €{Number(card.balance ?? 0).toFixed(2)}</Typography>
+                      <Typography className="mb-2">Limit: {card.limit ? `€${card.limit}` : '—'}</Typography>
                     <Typography className="mb-2">Card ID: {card.id}</Typography>
                 </CardContent>
             </Card>

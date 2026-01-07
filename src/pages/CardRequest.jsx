@@ -41,11 +41,11 @@ export default function CardRequest() {
 
         const limit = Number(formData.limit)
         if (Number.isNaN(limit) || limit < 100) {
-            setError('Please enter a valid limit amount greater than or equal to 100')
+            setError('Please enter a valid limit amount greater than or equal to €100')
             return
         }
         if (limit > 30000) {
-            setError('Maximum allowed limit is 30000')
+            setError('Maximum allowed limit is €30000')
             return
         }
 
