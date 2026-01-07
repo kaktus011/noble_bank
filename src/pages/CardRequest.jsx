@@ -8,6 +8,7 @@ import {
     MenuItem,
     Alert,
     Box,
+    InputAdornment,
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 
@@ -23,10 +24,21 @@ export default function CardRequest() {
 
     const handleChange = (e) => {
         const { name, value } = e.target
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }))
+        
+        // For limit field, only allow numbers
+        if (name === 'limit') {
+            // Strip all non-numeric characters immediately
+            const numericValue = value.replace(/\D/g, '')
+            setFormData((prev) => ({
+                ...prev,
+                [name]: numericValue,
+            }))
+        } else {
+            setFormData((prev) => ({
+                ...prev,
+                [name]: value,
+            }))
+        }
         setError('')
     }
 
@@ -53,7 +65,7 @@ export default function CardRequest() {
             return
         }
         if (limit > 30000) {
-            setError('Maximum allowed limit is €30 000')
+            setError('Maximum allowed limit is €30,000')
             return
         }
 
@@ -93,7 +105,7 @@ export default function CardRequest() {
 
             <Card>
                 <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
                         {error && <Alert severity="error">{error}</Alert>}
 
                         <TextField
@@ -133,7 +145,6 @@ export default function CardRequest() {
                                         : 'Daily Limit Amount'
                             }
                             name="limit"
-                            type="number"
                             placeholder={
                                 formData.cardType === 'debit'
                                     ? 'Enter desired spending limit'
@@ -142,8 +153,11 @@ export default function CardRequest() {
                             value={formData.limit}
                             onChange={handleChange}
                             variant="outlined"
-                            helperText="Max limit €30 000"
-                            inputProps={{ step: '100', min: '100', max: '30000' }}
+                            helperText="Max limit €30,000"
+                            InputProps={{
+                                startAdornment: <InputAdornment position="start">€</InputAdornment>,
+                            }}
+                            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', step: '100', min: '100', max: '30000' }}
                         />
 
                         <Box className="flex gap-4 pt-4">
