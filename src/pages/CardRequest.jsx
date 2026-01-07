@@ -25,10 +25,9 @@ export default function CardRequest() {
     const handleChange = (e) => {
         const { name, value } = e.target
         
-        // For limit field, only allow numbers
         if (name === 'limit') {
-            // Strip all non-numeric characters immediately
-            const numericValue = value.replace(/\D/g, '')
+            let numericValue = value.replace(/\D/g, '')
+            numericValue = numericValue.replace(/^0+(?!$)/, '') || '0'
             setFormData((prev) => ({
                 ...prev,
                 [name]: numericValue,
@@ -45,7 +44,6 @@ export default function CardRequest() {
     const handleSubmit = (e) => {
         e.preventDefault()
 
-        // Validation
         if (!formData.brand || !formData.cardType || !formData.limit) {
             setError('Please fill in all fields')
             return
@@ -54,10 +52,6 @@ export default function CardRequest() {
         const limit = Number(formData.limit)
         if (Number.isNaN(limit)) {
             setError('Please enter a valid numeric limit amount')
-            return
-        }
-        if (limit <= 0) {
-            setError('Please enter a positive limit amount')
             return
         }
         if (limit < 100) {
@@ -147,19 +141,19 @@ export default function CardRequest() {
                             name="limit"
                             placeholder={
                                 formData.cardType === 'debit'
-                                    ? 'Enter desired debit limit'
+                                    ? 'Enter desired daily debit limit'
                                     : formData.cardType === 'credit'
-                                        ? 'Enter desired credit limit'
-                                        : 'Enter desired spending limit'
+                                        ? 'Enter desired daily credit limit'
+                                        : 'Enter desired daily spending limit'
                             }
                             value={formData.limit}
                             onChange={handleChange}
                             variant="outlined"
-                            helperText="Max limit €30,000"
+                            helperText="Min €100, Max €30,000"
                             InputProps={{
                                 startAdornment: <InputAdornment position="start">€</InputAdornment>,
                             }}
-                            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', step: '100', min: '100', max: '30000' }}
+                            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*'}}
                         />
 
                         <Box className="flex gap-4 pt-4">
