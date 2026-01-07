@@ -147,8 +147,10 @@ export default function CardRequest() {
                             name="limit"
                             placeholder={
                                 formData.cardType === 'debit'
-                                    ? 'Enter desired spending limit'
-                                    : 'Enter desired credit limit'
+                                    ? 'Enter desired debit limit'
+                                    : formData.cardType === 'credit'
+                                        ? 'Enter desired credit limit'
+                                        : 'Enter desired spending limit'
                             }
                             value={formData.limit}
                             onChange={handleChange}
