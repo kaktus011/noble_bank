@@ -119,10 +119,10 @@ export default function CardRequest() {
                             fullWidth
                             label={
                                 formData.cardType === 'debit'
-                                    ? 'Spending Limit'
+                                    ? 'Daily Spending Limit'
                                     : formData.cardType === 'credit'
-                                        ? 'Credit Limit'
-                                        : 'Limit Amount'
+                                        ? 'Daily Credit Limit'
+                                        : 'Daily Limit Amount'
                             }
                             name="limit"
                             type="number"
@@ -134,7 +134,7 @@ export default function CardRequest() {
                             value={formData.limit}
                             onChange={handleChange}
                             variant="outlined"
-                            helperText="Max limit 30000"
+                            helperText="Max limit €30 000"
                             inputProps={{ step: '100', min: '100', max: '30000' }}
                         />
 
