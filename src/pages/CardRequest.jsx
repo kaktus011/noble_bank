@@ -45,12 +45,12 @@ export default function CardRequest() {
             return
         }
         if (limit > 30000) {
-            setError('Maximum allowed limit is €30000')
+            setError('Maximum allowed limit is €30 000')
             return
         }
 
         // Simulate successful submission
-        // TODO : Integrate with backend API
+        // TODO: Integrate with backend API
         setSubmitted(true)
         setTimeout(() => {
             navigate('/')
@@ -89,6 +89,7 @@ export default function CardRequest() {
                         {error && <Alert severity="error">{error}</Alert>}
 
                         <TextField
+                            required
                             select
                             fullWidth
                             label="Card Brand"
@@ -101,6 +102,7 @@ export default function CardRequest() {
                         </TextField>
 
                         <TextField
+                            required
                             select
                             fullWidth
                             label="Card Type"
@@ -113,8 +115,15 @@ export default function CardRequest() {
                         </TextField>
 
                         <TextField
+                            required
                             fullWidth
-                            label={formData.cardType === 'debit' ? 'Spending Limit' : 'Credit Limit'}
+                            label={
+                                formData.cardType === 'debit'
+                                    ? 'Spending Limit'
+                                    : formData.cardType === 'credit'
+                                        ? 'Credit Limit'
+                                        : 'Limit Amount'
+                            }
                             name="limit"
                             type="number"
                             placeholder={
