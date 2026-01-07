@@ -34,7 +34,7 @@ export default function Home() {
               <Typography variant="h6" className="mb-4">
                 Last Transactions
               </Typography>
-              <div className="flex-1 overflow-y-auto pr-1">
+              <div className="flex-1 overflow-y-auto pr-1" aria-labelledby="Last Transactions">
                 {txError ? (
                   <Alert severity="error">Error loading transactions: {String(txError.message ?? txError)}</Alert>
                 ) : txLoading ? (
@@ -73,7 +73,7 @@ export default function Home() {
               <Typography variant="h6" className="mb-4">
                 Available Loans
               </Typography>
-              <div className="flex-1 overflow-y-auto pr-1">
+              <div className="flex-1 overflow-y-auto pr-1" aria-labelledby="Available Loans">
                 {loansError ? (
                   <Alert severity="error">Error loading loans: {String(loansError.message ?? loansError)}</Alert>
                 ) : loansLoading ? (
@@ -102,7 +102,7 @@ export default function Home() {
         </Grid>
 
         <Grid item xs={12}>
-          <Card className="h-124 flex flex-col">
+          <Card className="h-96 flex flex-col">
             <CardContent className="flex flex-col h-full">
               <div className="flex items-center justify-between mb-4">
                 <Typography variant="h6">Your Cards</Typography>
@@ -111,7 +111,7 @@ export default function Home() {
                 </Button>
               </div>
 
-              <div className="flex-1 overflow-y-auto pr-1">
+              <div className="flex-1 overflow-y-auto pr-1" aria-labelledby="Your Cards">
                 {cardsError ? (
                   <Alert severity="error">Error loading cards: {String(cardsError.message ?? cardsError)}</Alert>
                 ) : cardsLoading ? (
