@@ -22,6 +22,28 @@ export default function CardRequest() {
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState('')
 
+    const getLimitLabel = (cardType) => {
+        switch (cardType) {
+            case 'debit':
+                return 'Daily Spending Limit'
+            case 'credit':
+                return 'Daily Credit Limit'
+            default:
+                return 'Daily Limit Amount'
+        }
+    }
+
+    const getLimitPlaceholder = (cardType) => {
+        switch (cardType) {
+            case 'debit':
+                return 'Enter desired daily debit limit'
+            case 'credit':
+                return 'Enter desired daily credit limit'
+            default:
+                return 'Enter desired daily spending limit'
+        }
+    }
+
     const handleChange = (e) => {
         const { name, value } = e.target
         
@@ -131,21 +153,9 @@ export default function CardRequest() {
                         <TextField
                             required
                             fullWidth
-                            label={
-                                formData.cardType === 'debit'
-                                    ? 'Daily Spending Limit'
-                                    : formData.cardType === 'credit'
-                                        ? 'Daily Credit Limit'
-                                        : 'Daily Limit Amount'
-                            }
+                            label={getLimitLabel(formData.cardType)}
                             name="limit"
-                            placeholder={
-                                formData.cardType === 'debit'
-                                    ? 'Enter desired daily debit limit'
-                                    : formData.cardType === 'credit'
-                                        ? 'Enter desired daily credit limit'
-                                        : 'Enter desired daily spending limit'
-                            }
+                            placeholder={getLimitPlaceholder(formData.cardType)}
                             value={formData.limit}
                             onChange={handleChange}
                             variant="outlined"
