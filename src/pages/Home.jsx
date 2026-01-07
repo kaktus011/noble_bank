@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Typography,
   Grid,
@@ -54,7 +53,7 @@ export default function Home() {
                       <ListItem key={t.id} className="px-0">
                         <ListItemText
                           primary={t.description}
-                          secondary={`${t.date} • ${t.type === 'debit' ? '-' : '+'} $${Math.abs(
+                          secondary={`${t.date} • ${t.type === 'debit' ? '-' : '+'} €${Math.abs(
                             Number(t.amount ?? 0)
                           ).toFixed(2)}`}
                         />
@@ -90,7 +89,7 @@ export default function Home() {
                       <ListItem key={l.id} className="px-0">
                         <ListItemText
                           primary={l.name}
-                          secondary={`Outstanding: $${(l.outstanding ?? 0).toLocaleString()} • Rate: ${l.rate}%`}
+                          secondary={`Outstanding: €${(l.outstanding ?? 0).toLocaleString()} • Rate: ${l.rate}%`}
                         />
                       </ListItem>
                     ))}
@@ -106,8 +105,8 @@ export default function Home() {
             <CardContent className="flex flex-col h-full">
               <div className="flex items-center justify-between mb-4">
                 <Typography variant="h6">Your Cards</Typography>
-                <Button size="small" component={Link} to="/cards">
-                  Manage cards
+                <Button size="small" component={Link} to="/request-card">
+                  Request a new card
                 </Button>
               </div>
 
@@ -138,7 +137,7 @@ export default function Home() {
                             <Typography color="text.secondary" className="mb-2">
                               {c.type} — Exp: {c.expiry}
                             </Typography>
-                            <Typography className="mb-3">Balance: ${Number(c.balance ?? 0).toFixed(2)}</Typography>
+                            <Typography className="mb-3">Balance: €{Number(c.balance ?? 0).toFixed(2)}</Typography>
                             <Button component={Link} to={`/cards/${c.id}`} variant="outlined" size="small">
                               View Details
                             </Button>
