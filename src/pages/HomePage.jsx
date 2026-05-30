@@ -60,7 +60,7 @@ export default function HomePage() {
                       >
                         <ListItemText
                           primary={t.description}
-                          secondary={`${t.date} • ${t.type === 'debit' ? '-' : '+'} €${Math.abs(Number(t.amount ?? 0)).toFixed(2)}`}
+                          secondary={`${new Date(t.occurredAt).toLocaleDateString('en-GB')} • ${t.type === 'Debit' ? '-' : '+'} €${Math.abs(Number(t.amount ?? 0)).toFixed(2)}`}
                         />
                       </ListItemButton>
                     ))}
@@ -101,8 +101,8 @@ export default function HomePage() {
                         onClick={() => navigate(`/loans/${l.id}`, { state: { loan: l } })}
                       >
                         <ListItemText
-                          primary={l.name}
-                          secondary={`Outstanding: €${(l.outstanding ?? 0).toLocaleString()} • Rate: ${l.rate}%`}
+                          primary={`${l.type} Loan`}
+                          secondary={`Remaining: €${Number(l.remainingAmount ?? 0).toLocaleString()} • Rate: ${l.interestRate}%`}
                         />
                       </ListItemButton>
                     ))}
@@ -146,9 +146,9 @@ export default function HomePage() {
                       <Grid item key={c.id} xs={12} sm={6} md={4}>
                         <Card className="hover:shadow-lg">
                           <CardContent>
-                            <Typography className="font-semibold">{c.brand} • **** {c.last4}</Typography>
+                            <Typography className="font-semibold">{c.brand} • **** {c.last4Digits ?? c.last4}</Typography>
                             <Typography color="text.secondary" className="mb-2">
-                              {c.type} — Exp: {c.expiry}
+                              {c.type} — Exp: {c.expiryDate ? new Date(c.expiryDate).toLocaleDateString('en-GB', { month: '2-digit', year: '2-digit' }) : c.expiry}
                             </Typography>
                             <Typography className="mb-3">Balance: €{Number(c.balance ?? 0).toFixed(2)}</Typography>
                             <Button component={Link} to={`/cards/${c.id}`} variant="outlined" size="small">

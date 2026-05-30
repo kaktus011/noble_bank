@@ -8,10 +8,14 @@ import {
   Alert,
 } from '@mui/material'
 import { Link } from 'react-router-dom'
-import { useCards } from '../hooks/useCards'
+import { useCards, useAdminCards } from '../hooks/useCards'
+import { useAuth } from '../context/AuthContext'
 
 export default function CardsPage() {
-  const { data: cards = [], isLoading, error } = useCards()
+  const { user } = useAuth()
+  const userCards = useCards()
+  const adminCards = useAdminCards()
+  const { data: cards = [], isLoading, error } = user?.isAdmin ? adminCards : userCards
 
   if (error)
     return <Alert severity="error">Error loading cards: {String(error.message ?? error)}</Alert>
@@ -49,17 +53,17 @@ export default function CardsPage() {
               <Card className="hover:shadow-lg h-full">
                 <CardContent>
                   <Typography variant="h6" className="font-semibold mb-1">
-                    {c.brand} • **** {c.last4}
+                    {c.brand} • **** {c.last4Digits ?? c.last4}
                   </Typography>
                   <Typography color="text.secondary" className="mb-1">
-                    {c.type} — Exp: {c.expiry}
+                    {c.type} — Exp: {c.expiryDate ? new Date(c.expiryDate).toLocaleDateString('en-GB', { month: '2-digit', year: '2-digit' }) : c.expiry}
                   </Typography>
                   <Typography className="mb-1">
-                    Balance: €{Number(c.balance ?? 0).toFixed(2)}
+                    Balance: {c.currency ?? '€'} {Number(c.balance ?? 0).toFixed(2)}
                   </Typography>
-                  {c.limit && (
+                  {(c.creditLimit ?? c.limit) && (
                     <Typography color="text.secondary" className="mb-3">
-                      Limit: €{Number(c.limit).toLocaleString()}
+                      Limit: {c.currency ?? '€'} {Number(c.creditLimit ?? c.limit).toLocaleString()}
                     </Typography>
                   )}
                   <Button component={Link} to={`/cards/${c.id}`} variant="outlined" size="small">

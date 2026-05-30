@@ -22,6 +22,27 @@ export function useLoan(id) {
   })
 }
 
+export function useAdminLoans() {
+  return useQuery({
+    queryKey: ['admin', 'loans'],
+    queryFn: async () => {
+      const { data } = await client.get('/admin/loans')
+      return data
+    },
+  })
+}
+
+export function useAdminLoan(id) {
+  return useQuery({
+    queryKey: ['admin', 'loans', id],
+    queryFn: async () => {
+      const { data } = await client.get(`/admin/loans/${id}`)
+      return data
+    },
+    enabled: !!id,
+  })
+}
+
 export function useRequestLoan() {
   const queryClient = useQueryClient()
   return useMutation({

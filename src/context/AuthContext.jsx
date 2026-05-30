@@ -1,9 +1,11 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import client from '../api/client'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
+  const queryClient = useQueryClient()
   const [token, setToken] = useState(localStorage.getItem('token'))
   const [user, setUser] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -14,12 +16,13 @@ export function AuthProvider({ children }) {
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]))
+        const role = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
         setUser({
           id: payload.sub,
           email: payload.email,
           name: payload.name,
-          role: payload.role,  // "Administrator" or "User"
-          isAdmin: payload.role === 'Administrator'
+          role,
+          isAdmin: role === 'Administrator'
         })
       } catch {
         setUser(null)
@@ -72,6 +75,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token')
     setToken(null)
     setUser(null)
+    queryClient.clear()
   }
 
   return (

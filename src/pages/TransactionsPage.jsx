@@ -9,11 +9,15 @@ import {
   Chip,
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
-import { useTransactions } from '../hooks/useTransactions'
+import { useTransactions, useAdminTransactions } from '../hooks/useTransactions'
+import { useAuth } from '../context/AuthContext'
 
 export default function TransactionsPage() {
   const navigate = useNavigate()
-  const { data: tx = [], isLoading, error } = useTransactions()
+  const { user } = useAuth()
+  const userTx = useTransactions()
+  const adminTx = useAdminTransactions()
+  const { data: tx = [], isLoading, error } = user?.isAdmin ? adminTx : userTx
 
   if (error)
     return <Alert severity="error">Error loading transactions: {String(error.message ?? error)}</Alert>
@@ -21,7 +25,7 @@ export default function TransactionsPage() {
   return (
     <div className="max-w-3xl mx-auto">
       <Typography variant="h4" className="mt-6 mb-6">
-        Transactions
+        {user?.isAdmin ? 'All Transactions' : 'Transactions'}
       </Typography>
 
       {isLoading ? (
@@ -43,11 +47,16 @@ export default function TransactionsPage() {
               >
                 <ListItemText
                   primary={t.description}
-                  secondary={t.date}
+                  secondary={
+                    <>
+                      {new Date(t.occurredAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      {user?.isAdmin && t.cardLast4 && ` • Card ••••${t.cardLast4}`}
+                    </>
+                  }
                 />
                 <Chip
-                  label={`${t.type === 'debit' ? '-' : '+'} €${Math.abs(Number(t.amount ?? 0)).toFixed(2)}`}
-                  color={t.type === 'debit' ? 'error' : 'success'}
+                  label={`${t.type === 'Debit' ? '-' : '+'} €${Math.abs(Number(t.amount ?? 0)).toFixed(2)}`}
+                  color={t.type === 'Debit' ? 'error' : 'success'}
                   variant="outlined"
                   size="small"
                 />

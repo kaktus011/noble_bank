@@ -22,6 +22,27 @@ export function useCard(id) {
   })
 }
 
+export function useAdminCards() {
+  return useQuery({
+    queryKey: ['admin', 'cards'],
+    queryFn: async () => {
+      const { data } = await client.get('/admin/cards')
+      return data
+    },
+  })
+}
+
+export function useAdminCard(id) {
+  return useQuery({
+    queryKey: ['admin', 'cards', id],
+    queryFn: async () => {
+      const { data } = await client.get(`/admin/cards/${id}`)
+      return data
+    },
+    enabled: !!id,
+  })
+}
+
 export function useRequestCard() {
   const queryClient = useQueryClient()
   return useMutation({
