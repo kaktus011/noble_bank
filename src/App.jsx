@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import Header from './components/Header'
 
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
@@ -17,8 +18,11 @@ export default function App() {
   const { token } = useAuth()
 
   return (
-    <Routes>
-      {/* Public routes */}
+    <>
+      {token && <Header />}
+      <div className="px-4 py-6">
+        <Routes>
+          {/* Public routes */}
       <Route
         path="/login"
         element={token ? <Navigate to="/" replace /> : <LoginPage />}
@@ -61,6 +65,8 @@ export default function App() {
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        </Routes>
+      </div>
+    </>
   )
 }
