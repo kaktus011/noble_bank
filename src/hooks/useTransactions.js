@@ -1,31 +1,34 @@
-import axios from 'axios'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import client from '../api/client'
 
-const mapPostToTransaction = (post, index) => {
-  const id = `t${post.id}`
-  const date = new Date(Date.now() - index * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
-  // deterministic pseudo-random amount based on id
-  const base = (Number(post.id) * 997) % 10000
-  const sign = base % 2 === 0 ? 1 : -1
-  const amount = (base % 5000) / 100 * sign
-  return {
-    id,
-    date,
-    description: post.title,
-    amount: Number(amount.toFixed(2)),
-    type: amount < 0 ? 'debit' : 'credit',
-  }
-}
-
-const fetchTransactions = async () => {
-  const res = await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=12')
-  return res.data.map((p, i) => mapPostToTransaction(p, i))
-}
-
-export function useTransactions() {
+export function useTransactions(cardId = null, limit = 50) {
   return useQuery({
-    queryKey: ['transactions'],
-    queryFn: fetchTransactions,
-    staleTime: 1000 * 30,
+    queryKey: ['transactions', cardId, limit],
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (cardId) params.append('cardId', cardId)
+      if (limit) params.append('limit', limit)
+      const { data } = await client.get(`/transactions?${params}`)
+      return data
+    },
+  })
+}
+
+export function useCreateTransaction() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ cardId, amount, description, type }) => {
+      const { data } = await client.post('/transactions', {
+        cardId,
+        amount,
+        description,
+        type,
+      })
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      queryClient.invalidateQueries({ queryKey: ['cards'] })
+    },
   })
 }
