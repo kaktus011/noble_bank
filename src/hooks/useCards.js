@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useAuth } from '../context/AuthContext'
 import client from '../api/client'
 
 export function useCards() {
@@ -23,23 +24,26 @@ export function useCard(id) {
 }
 
 export function useAdminCards() {
+  const { user } = useAuth()
   return useQuery({
     queryKey: ['admin', 'cards'],
     queryFn: async () => {
       const { data } = await client.get('/admin/cards')
       return data
     },
+    enabled: !!user?.isAdmin,
   })
 }
 
 export function useAdminCard(id) {
+  const { user } = useAuth()
   return useQuery({
     queryKey: ['admin', 'cards', id],
     queryFn: async () => {
       const { data } = await client.get(`/admin/cards/${id}`)
       return data
     },
-    enabled: !!id,
+    enabled: !!user?.isAdmin && !!id,
   })
 }
 
@@ -52,6 +56,30 @@ export function useRequestCard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cards'] })
+    },
+  })
+}
+
+export function useApproveCard() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id) => {
+      await client.post(`/admin/cards/${id}/approve`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'cards'] })
+    },
+  })
+}
+
+export function useRejectCard() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, reason }) => {
+      await client.post(`/admin/cards/${id}/reject`, { reason })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'cards'] })
     },
   })
 }

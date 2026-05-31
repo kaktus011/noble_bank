@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useAuth } from '../context/AuthContext'
 import client from '../api/client'
 
 export function useTransactions(cardId = null, limit = 50) {
@@ -15,23 +16,26 @@ export function useTransactions(cardId = null, limit = 50) {
 }
 
 export function useAdminTransactions() {
+  const { user } = useAuth()
   return useQuery({
     queryKey: ['admin', 'transactions'],
     queryFn: async () => {
       const { data } = await client.get('/admin/transactions')
       return data
     },
+    enabled: !!user?.isAdmin,
   })
 }
 
 export function useAdminTransaction(id) {
+  const { user } = useAuth()
   return useQuery({
     queryKey: ['admin', 'transactions', id],
     queryFn: async () => {
       const { data } = await client.get(`/admin/transactions/${id}`)
       return data
     },
-    enabled: !!id,
+    enabled: !!user?.isAdmin && !!id,
   })
 }
 

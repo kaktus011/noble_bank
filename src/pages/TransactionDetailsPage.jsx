@@ -8,26 +8,29 @@ export default function TransactionDetailsPage() {
   const { state } = useLocation()
   const { user } = useAuth()
 
-  const userTx = useTransactions(null, 200)
-  const adminTx = useAdminTransaction(user?.isAdmin ? id : null)
-  const { data: txData, isLoading, error } = user?.isAdmin ? adminTx : userTx
+  const userTxList = useTransactions(null, 200) // fires for regular users
+  const adminTx = useAdminTransaction(id)        // fires only for admins (hook checks internally)
 
-  if (error)
-    return <Alert severity="error">Error loading transaction: {String(error.message ?? error)}</Alert>
+  if (user?.isAdmin ? adminTx.error : userTxList.error) {
+    const err = user?.isAdmin ? adminTx.error : userTxList.error
+    return <Alert severity="error">Error loading transaction: {String(err.message ?? err)}</Alert>
+  }
 
-  if (isLoading)
+  if (user?.isAdmin ? adminTx.isLoading : userTxList.isLoading)
     return <div className="max-w-xl mx-auto"><Skeleton variant="rectangular" height={200} /></div>
 
   const transaction = user?.isAdmin
-    ? txData
-    : (state?.transaction ?? (Array.isArray(txData) ? txData.find((t) => String(t.id) === String(id)) : null))
+    ? adminTx.data
+    : (state?.transaction ?? (Array.isArray(userTxList.data) ? userTxList.data.find((t) => String(t.id) === String(id)) : null))
 
   if (!transaction)
     return <Alert severity="info">Transaction not found.</Alert>
 
   const isDebit = transaction.type === 'Debit'
   const dateFormatted = transaction.occurredAt
-    ? new Date(transaction.occurredAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    ? new Date(transaction.occurredAt).toLocaleDateString('en-GB', {
+        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+      })
     : '—'
 
   return (
