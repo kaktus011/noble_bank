@@ -17,8 +17,11 @@ export default function CardDetails() {
     if (error)
         return <Alert severity="error">Error loading card: {String(error.message ?? error)}</Alert>
 
+
     if (isLoading)
         return (
+            <div className="max-w-xl mx-auto">
+                <Skeleton variant="rectangular" height={200} className="rounded" />
             <div className="max-w-xl mx-auto">
                 <Skeleton variant="rectangular" height={200} className="rounded" />
             </div>
@@ -38,6 +41,8 @@ export default function CardDetails() {
             </Button>
 
             <Card className="mt-4">
+
+            <Card className="mt-4">
                 <CardContent>
                     <div className="flex items-start justify-between mb-2">
                         <Typography variant="h5">
@@ -54,6 +59,7 @@ export default function CardDetails() {
                     </div>
 
                     <Typography color="text.secondary" className="mb-4">
+                        {card.type} — Expires {expiryFormatted}
                         {card.type} — Expires {expiryFormatted}
                     </Typography>
 
@@ -83,6 +89,20 @@ export default function CardDetails() {
                     )}
                 </CardContent>
             </Card>
+        </div>
+    )
+}
+
+function Row({ label, value, mono = false }) {
+    return (
+        <div className="flex justify-between items-center">
+            <Typography color="text.secondary">{label}</Typography>
+            <Typography
+                variant="body2"
+                sx={mono ? { fontFamily: 'monospace', fontSize: '0.75rem', color: 'text.secondary' } : {}}
+            >
+                {value}
+            </Typography>
         </div>
     )
 }
