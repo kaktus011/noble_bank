@@ -51,11 +51,9 @@ export default function Header() {
           <Button color="inherit" component={Link} to="/loans">
             Loans
           </Button>
-          {user?.isAdmin && (
-            <Button color="inherit" component={Link} to="/posts">
-              Posts
-            </Button>
-          )}
+          <Button color="inherit" component={Link} to="/posts">
+            Posts
+          </Button>
 
           {/* Divider */}
           <Box sx={{ width: '1px', height: 24, bgcolor: 'rgba(255,255,255,0.3)', mx: 1 }} />

@@ -35,6 +35,18 @@ export function useCreatePost() {
   })
 }
 
+export function useDeletePost() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id) => {
+      await client.delete(`/posts/${id}`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+    },
+  })
+}
+
 export function useUpdatePost() {
   const queryClient = useQueryClient()
   return useMutation({
