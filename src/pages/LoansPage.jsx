@@ -1,15 +1,11 @@
+import { useState } from 'react'
 import {
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  Skeleton,
-  Alert,
-  Chip,
-  Divider,
-  LinearProgress,
+  Typography, Grid, Card, CardContent, Skeleton, Alert, Chip,
+  Divider, LinearProgress, Button, Dialog, DialogTitle,
+  DialogContent, DialogActions, TextField,
 } from '@mui/material'
-import { useLoans, useAdminLoans } from '../hooks/useLoans'
+import { Link } from 'react-router-dom'
+import { useLoans, useAdminLoans, useApproveLoan, useRejectLoan } from '../hooks/useLoans'
 import { useAuth } from '../context/AuthContext'
 
 export default function LoansPage() {
@@ -17,6 +13,22 @@ export default function LoansPage() {
   const userLoans = useLoans()
   const adminLoans = useAdminLoans()
   const { data: loans = [], isLoading, error } = user?.isAdmin ? adminLoans : userLoans
+
+  const approveLoan = useApproveLoan()
+  const rejectLoan = useRejectLoan()
+
+  const [rejectDialog, setRejectDialog] = useState(null) // { id }
+  const [rejectReason, setRejectReason] = useState('')
+
+  const handleApprove = async (id) => {
+    await approveLoan.mutateAsync(id)
+  }
+
+  const handleRejectConfirm = async () => {
+    await rejectLoan.mutateAsync({ id: rejectDialog.id, reason: rejectReason })
+    setRejectDialog(null)
+    setRejectReason('')
+  }
 
   if (error)
     return <Alert severity="error">Error loading loans: {String(error.message ?? error)}</Alert>
@@ -72,25 +84,88 @@ export default function LoansPage() {
                     )}
                   </div>
 
-                  <div className="mt-2">
+                  <div className="mb-3">
                     <div className="flex justify-between mb-1">
                       <Typography variant="caption" color="text.secondary">Progress</Typography>
-                      <Typography variant="caption" color="text.secondary">{Number(l.progressPercentage).toFixed(0)}%</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {Number(l.progressPercentage).toFixed(0)}%
+                      </Typography>
                     </div>
                     <LinearProgress variant="determinate" value={Math.min(Number(l.progressPercentage), 100)} />
                   </div>
 
                   {l.rejectionReason && (
-                    <Alert severity="error" className="mt-3" sx={{ py: 0 }}>
+                    <Alert severity="error" className="mb-3" sx={{ py: 0 }}>
                       {l.rejectionReason}
                     </Alert>
                   )}
+
+                  <div className="flex gap-2 flex-wrap">
+                    <Button
+                      component={Link}
+                      to={`/loans/${l.id}`}
+                      variant="outlined"
+                      size="small"
+                    >
+                      View Details
+                    </Button>
+
+                    {user?.isAdmin && l.status === 'Pending' && (
+                      <>
+                        <Button
+                          variant="contained"
+                          color="success"
+                          size="small"
+                          onClick={() => handleApprove(l.id)}
+                          disabled={approveLoan.isPending}
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="small"
+                          onClick={() => setRejectDialog({ id: l.id })}
+                        >
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Grid>
       )}
+
+      {/* Reject dialog */}
+      <Dialog open={!!rejectDialog} onClose={() => { setRejectDialog(null); setRejectReason('') }} maxWidth="xs" fullWidth>
+        <DialogTitle>Reject Loan</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            label="Rejection Reason"
+            fullWidth
+            multiline
+            rows={3}
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            className="mt-2"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setRejectDialog(null); setRejectReason('') }}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleRejectConfirm}
+            disabled={!rejectReason.trim() || rejectLoan.isPending}
+          >
+            Confirm Reject
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   )
 }

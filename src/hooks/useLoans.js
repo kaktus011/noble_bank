@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useAuth } from '../context/AuthContext'
 import client from '../api/client'
 
 export function useLoans() {
@@ -23,23 +24,26 @@ export function useLoan(id) {
 }
 
 export function useAdminLoans() {
+  const { user } = useAuth()
   return useQuery({
     queryKey: ['admin', 'loans'],
     queryFn: async () => {
       const { data } = await client.get('/admin/loans')
       return data
     },
+    enabled: !!user?.isAdmin,
   })
 }
 
 export function useAdminLoan(id) {
+  const { user } = useAuth()
   return useQuery({
     queryKey: ['admin', 'loans', id],
     queryFn: async () => {
       const { data } = await client.get(`/admin/loans/${id}`)
       return data
     },
-    enabled: !!id,
+    enabled: !!user?.isAdmin && !!id,
   })
 }
 
@@ -52,6 +56,30 @@ export function useRequestLoan() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['loans'] })
+    },
+  })
+}
+
+export function useApproveLoan() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id) => {
+      await client.post(`/admin/loans/${id}/approve`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'loans'] })
+    },
+  })
+}
+
+export function useRejectLoan() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, reason }) => {
+      await client.post(`/admin/loans/${id}/reject`, { reason })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'loans'] })
     },
   })
 }
