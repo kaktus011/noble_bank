@@ -10,6 +10,7 @@ import CardsPage from './pages/CardsPage'
 import CardDetailsPage from './pages/CardDetailsPage'
 import CardRequest from './pages/CardRequest'
 import LoansPage from './pages/LoansPage'
+import LoanDetailsPage from './pages/LoanDetailsPage'
 import TransactionsPage from './pages/TransactionsPage'
 import TransactionDetailsPage from './pages/TransactionDetailsPage'
 import PostsPage from './pages/PostsPage'
@@ -46,6 +47,9 @@ export default function App() {
 
       <Route path="/loans" element={
         <ProtectedRoute><LoansPage /></ProtectedRoute>
+      } />
+      <Route path="/loans/:id" element={
+        <ProtectedRoute><LoanDetailsPage /></ProtectedRoute>
       } />
 
       <Route path="/cards" element={
