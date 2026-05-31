@@ -1,23 +1,57 @@
-import axios from 'axios'
-import { useQuery } from '@tanstack/react-query'
-
-const mapTodoToLoan = (todo) => ({
-  id: `l${todo.id}`,
-  name: todo.title,
-  outstanding: ((todo.id * 137) % 100000) + 500, // deterministic amount
-  rate: Number((1 + (todo.id % 5) * 0.5).toFixed(2)),
-  status: todo.completed ? 'paid' : 'active',
-})
-
-const fetchLoans = async () => {
-  const res = await axios.get('https://jsonplaceholder.typicode.com/todos?_limit=6')
-  return res.data.map(mapTodoToLoan)
-}
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import client from '../api/client'
 
 export function useLoans() {
   return useQuery({
     queryKey: ['loans'],
-    queryFn: fetchLoans,
-    staleTime: 1000 * 60,
+    queryFn: async () => {
+      const { data } = await client.get('/loans')
+      return data
+    },
+  })
+}
+
+export function useLoan(id) {
+  return useQuery({
+    queryKey: ['loans', id],
+    queryFn: async () => {
+      const { data } = await client.get(`/loans/${id}`)
+      return data
+    },
+    enabled: !!id,
+  })
+}
+
+export function useAdminLoans() {
+  return useQuery({
+    queryKey: ['admin', 'loans'],
+    queryFn: async () => {
+      const { data } = await client.get('/admin/loans')
+      return data
+    },
+  })
+}
+
+export function useAdminLoan(id) {
+  return useQuery({
+    queryKey: ['admin', 'loans', id],
+    queryFn: async () => {
+      const { data } = await client.get(`/admin/loans/${id}`)
+      return data
+    },
+    enabled: !!id,
+  })
+}
+
+export function useRequestLoan() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ amount, termMonths, type }) => {
+      const { data } = await client.post('/loans/request', { amount, termMonths, type })
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['loans'] })
+    },
   })
 }

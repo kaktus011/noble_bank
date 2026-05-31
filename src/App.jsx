@@ -1,57 +1,72 @@
-import { Routes, Route, Link } from 'react-router-dom'
-import Home from './pages/Home'
-import Posts from './pages/Posts'
-import CardDetails from './pages/CardDetails'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { useAuth } from './context/AuthContext'
+import { ProtectedRoute } from './components/ProtectedRoute'
+import Header from './components/Header'
+
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
+import HomePage from './pages/HomePage'
+import CardsPage from './pages/CardsPage'
+import CardDetailsPage from './pages/CardDetailsPage'
 import CardRequest from './pages/CardRequest'
-import { AppBar, Toolbar, Typography, Container, Button } from '@mui/material'
+import LoansPage from './pages/LoansPage'
+import TransactionsPage from './pages/TransactionsPage'
+import TransactionDetailsPage from './pages/TransactionDetailsPage'
+import PostsPage from './pages/PostsPage'
 
 export default function App() {
-    return (
-        <div className="min-h-screen">
-            <AppBar
-                position="static"
-                color="transparent"
-                elevation={0}
-                className="relative text-white border-white bg-[url('/images/toolbar.jpg')] bg-center bg-cover bg-no-repeat">
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/45 to-transparent" />
+  const { token } = useAuth()
 
-                <Toolbar>
-                    <Typography
-                        color="inherit"
-                        variant="h6"
-                        component="div"
-                        className="flex-1 font-semibold tracking-wide drop-shadow" >
-                        Noble Bank
-                    </Typography>
+  return (
+    <>
+      {token && <Header />}
+      <div className="px-4 py-6">
+        <Routes>
+          {/* Public routes */}
+      <Route
+        path="/login"
+        element={token ? <Navigate to="/" replace /> : <LoginPage />}
+      />
+      <Route
+        path="/register"
+        element={token ? <Navigate to="/" replace /> : <RegisterPage />}
+      />
 
-                    <Button
-                        color="inherit"
-                        variant="outlined"
-                        component={Link}
-                        to="/"
-                        className="mx-2 border-[1.5px] hover:bg-white/10" >
-                        Home
-                    </Button>
+      {/* Protected routes */}
+      <Route path="/" element={
+        <ProtectedRoute><HomePage /></ProtectedRoute>
+      } />
 
-                    <Button
-                        color="inherit"
-                        variant="outlined"
-                        component={Link}
-                        to="/posts"
-                        className="mx-2 border-[1.5px] hover:bg-white/10" >
-                        Posts
-                    </Button>
-                </Toolbar>
-            </AppBar>
+      <Route path="/transactions" element={
+        <ProtectedRoute><TransactionsPage /></ProtectedRoute>
+      } />
+      <Route path="/transactions/:id" element={
+        <ProtectedRoute><TransactionDetailsPage /></ProtectedRoute>
+      } />
 
-            <Container className="py-8">
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/posts" element={<Posts />} />
-                    <Route path="/cards/:id" element={<CardDetails />} />
-                    <Route path="/request-card" element={<CardRequest />} />
-                </Routes>
-            </Container>
-        </div>
-    )
+      <Route path="/loans" element={
+        <ProtectedRoute><LoansPage /></ProtectedRoute>
+      } />
+
+      <Route path="/cards" element={
+        <ProtectedRoute><CardsPage /></ProtectedRoute>
+      } />
+      <Route path="/cards/request" element={
+        <ProtectedRoute><CardRequest /></ProtectedRoute>
+      } />
+      <Route path="/cards/:id" element={
+        <ProtectedRoute><CardDetailsPage /></ProtectedRoute>
+      } />
+
+      {/* Admin only */}
+      <Route path="/posts" element={
+        <ProtectedRoute adminOnly><PostsPage /></ProtectedRoute>
+      } />
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </>
+  )
 }
