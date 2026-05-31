@@ -8,14 +8,20 @@ export function AuthProvider({ children }) {
   const queryClient = useQueryClient()
   const [token, setToken] = useState(localStorage.getItem('token'))
   const [user, setUser] = useState(null)
+  const [isAuthInitialized, setIsAuthInitialized] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
 
   // decode JWT for user info
   useEffect(() => {
+    setIsAuthInitialized(false)
+
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]))
+        const base64Url = token.split('.')[1]
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+        const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=')
+        const payload = JSON.parse(atob(padded))
         const role = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
         setUser({
           id: payload.sub,
@@ -30,6 +36,8 @@ export function AuthProvider({ children }) {
     } else {
       setUser(null)
     }
+
+    setIsAuthInitialized(true)
   }, [token])
 
   const login = async (email, password) => {
@@ -38,6 +46,7 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await client.post('/auth/login', { email, password })
       localStorage.setItem('token', data.token)
+      setIsAuthInitialized(false)
       setToken(data.token)
       return { success: true }
     } catch (err) {
@@ -60,6 +69,7 @@ export function AuthProvider({ children }) {
         lastName,
       })
       localStorage.setItem('token', data.token)
+      setIsAuthInitialized(false)
       setToken(data.token)
       return { success: true }
     } catch (err) {
@@ -75,11 +85,12 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token')
     setToken(null)
     setUser(null)
+    setIsAuthInitialized(true)
     queryClient.clear()
   }
 
   return (
-    <AuthContext.Provider value={{ token, user, isLoading, error, login, register, logout }}>
+    <AuthContext.Provider value={{ token, user, isAuthInitialized, isLoading, error, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   )
