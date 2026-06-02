@@ -15,9 +15,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTransactions } from '../hooks/useTransactions'
 import { useLoans } from '../hooks/useLoans'
 import { useCards } from '../hooks/useCards'
+import { useAuth } from '../context/AuthContext'
 
 export default function HomePage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const { data: tx = [], isLoading: txLoading, error: txError } = useTransactions()
   const { data: loans = [], isLoading: loansLoading, error: loansError } = useLoans()
   const { data: cards = [], isLoading: cardsLoading, error: cardsError } = useCards()
@@ -60,7 +62,7 @@ export default function HomePage() {
                       >
                         <ListItemText
                           primary={t.description}
-                          secondary={`${new Date(t.occurredAt).toLocaleDateString('en-GB')} • ${t.type === 'Debit' ? '-' : '+'} €${Math.abs(Number(t.amount ?? 0)).toFixed(2)}`}
+                          secondary={`${new Date(t.occurredAt).toLocaleDateString('en-GB')} • ${t.type === 'Expense' ? '-' : '+'} €${Math.abs(Number(t.amount ?? 0)).toFixed(2)}`}
                         />
                       </ListItemButton>
                     ))}
@@ -119,9 +121,11 @@ export default function HomePage() {
             <CardContent className="flex flex-col h-full">
               <div className="flex items-center justify-between mb-4">
                 <Typography variant="h6">Your Cards</Typography>
-                <Button size="small" component={Link} to="/cards/request">
-                  Request a new card
-                </Button>
+                {!user?.isAdmin && (
+                  <Button size="small" component={Link} to="/cards/request">
+                    Request a new card
+                  </Button>
+                )}
               </div>
               <div className="flex-1 overflow-y-auto pr-1">
                 {cardsError ? (
