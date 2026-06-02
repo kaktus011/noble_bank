@@ -10,10 +10,14 @@ import {
     Box,
     InputAdornment,
 } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 export default function CardRequest() {
+    const { user } = useAuth()
     const navigate = useNavigate()
+
+    if (user?.isAdmin) return <Navigate to="/" replace />
     const [formData, setFormData] = useState({
         brand: '',
         cardType: '',

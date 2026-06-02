@@ -1,17 +1,28 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { TextField, Button, Alert, CircularProgress } from '@mui/material'
+import {
+  TextField, Button, Alert, CircularProgress,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+} from '@mui/material'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { login, isLoading, error } = useAuth()
+  const [sessionConflict, setSessionConflict] = useState(false)
+  const { login, isLoading, error, isAuthInitialized } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     const result = await login(email, password)
+    if (result.success) navigate('/')
+    else if (result.hasActiveSession) setSessionConflict(true)
+  }
+
+  const handleForceLogin = async () => {
+    setSessionConflict(false)
+    const result = await login(email, password, true)
     if (result.success) navigate('/')
   }
 
@@ -44,7 +55,7 @@ export default function LoginPage() {
             type="submit"
             variant="contained"
             fullWidth
-            disabled={isLoading}
+            disabled={isLoading || !isAuthInitialized}
             size="large"
           >
             {isLoading ? <CircularProgress size={24} /> : 'Login'}
@@ -58,6 +69,23 @@ export default function LoginPage() {
           </Link>
         </p>
       </div>
+
+      {/* Session conflict dialog */}
+      <Dialog open={sessionConflict} onClose={() => setSessionConflict(false)}>
+        <DialogTitle>Active Session Detected</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This account already has an active session on another device or browser window.
+            Would you like to terminate that session and log in here instead?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSessionConflict(false)}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={handleForceLogin} disabled={isLoading}>
+            {isLoading ? <CircularProgress size={20} /> : 'Yes, terminate it'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   )
 }

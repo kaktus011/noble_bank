@@ -55,8 +55,8 @@ export default function TransactionsPage() {
                   }
                 />
                 <Chip
-                  label={`${t.type === 'Debit' ? '-' : '+'} €${Math.abs(Number(t.amount ?? 0)).toFixed(2)}`}
-                  color={t.type === 'Debit' ? 'error' : 'success'}
+                  label={`${t.type === 'Expense' ? '-' : '+'} €${Math.abs(Number(t.amount ?? 0)).toFixed(2)}`}
+                  color={t.type === 'Expense' ? 'error' : 'success'}
                   variant="outlined"
                   size="small"
                 />
