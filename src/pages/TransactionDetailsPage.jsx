@@ -26,7 +26,7 @@ export default function TransactionDetailsPage() {
   if (!transaction)
     return <Alert severity="info">Transaction not found.</Alert>
 
-  const isDebit = transaction.type === 'Debit'
+  const isDebit = transaction.type === 'Expense'
   const dateFormatted = transaction.occurredAt
     ? new Date(transaction.occurredAt).toLocaleDateString('en-GB', {
         day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
