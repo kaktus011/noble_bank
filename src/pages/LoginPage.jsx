@@ -24,6 +24,7 @@ export default function LoginPage() {
     setSessionConflict(false)
     const result = await login(email, password, true)
     if (result.success) navigate('/')
+    else if (result.hasActiveSession) setSessionConflict(true)
   }
 
   return (
