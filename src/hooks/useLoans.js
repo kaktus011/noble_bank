@@ -47,6 +47,17 @@ export function useAdminLoan(id) {
   })
 }
 
+export function useLoanOptions() {
+  return useQuery({
+    queryKey: ['loans', 'options'],
+    queryFn: async () => {
+      const { data } = await client.get('/loans/options')
+      return data
+    },
+    staleTime: 1000 * 60 * 60,
+  })
+}
+
 export function useRequestLoan() {
   const queryClient = useQueryClient()
   return useMutation({

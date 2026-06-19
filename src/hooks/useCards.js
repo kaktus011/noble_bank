@@ -47,6 +47,17 @@ export function useAdminCard(id) {
   })
 }
 
+export function useCardOptions() {
+  return useQuery({
+    queryKey: ['cards', 'options'],
+    queryFn: async () => {
+      const { data } = await client.get('/cards/options')
+      return data
+    },
+    staleTime: 1000 * 60 * 60,
+  })
+}
+
 export function useRequestCard() {
   const queryClient = useQueryClient()
   return useMutation({

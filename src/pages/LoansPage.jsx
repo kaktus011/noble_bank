@@ -35,9 +35,16 @@ export default function LoansPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <Typography variant="h4" className="mt-6 mb-6">
-        {user?.isAdmin ? 'All Loans' : 'Loans'}
-      </Typography>
+      <div className="flex items-center justify-between mt-6 mb-6">
+        <Typography variant="h4">
+          {user?.isAdmin ? 'All Loans' : 'Loans'}
+        </Typography>
+        {!user?.isAdmin && (
+          <Button variant="contained" component={Link} to="/loans/request">
+            Request a new loan
+          </Button>
+        )}
+      </div>
 
       {isLoading ? (
         <Grid container spacing={3}>
