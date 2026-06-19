@@ -13,45 +13,34 @@ import {
 } from '@mui/material'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { useCardOptions, useRequestCard } from '../hooks/useCards'
-
-const CREDIT_TYPE_NAME = 'Credit'
+import { useLoanOptions, useRequestLoan } from '../hooks/useLoans'
 
 const humanizeName = (name) =>
     name.replace(/([a-z])([A-Z])/g, '$1 $2')
 
-export default function CardRequest() {
+export default function LoanRequest() {
     const { user } = useAuth()
     const navigate = useNavigate()
 
     if (user?.isAdmin) return <Navigate to="/" replace />
 
-    const { data: options, isLoading: optionsLoading, error: optionsError } = useCardOptions()
-    const requestCard = useRequestCard()
+    const { data: options, isLoading: optionsLoading, error: optionsError } = useLoanOptions()
+    const requestLoan = useRequestLoan()
 
     const [formData, setFormData] = useState({
-        brand: '',
         type: '',
-        limit: '',
+        amount: '',
+        termMonths: '',
     })
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState('')
 
     const types = options?.types ?? []
-    const brands = options?.brands ?? []
-
-    const selectedType = types.find((t) => String(t.value) === String(formData.type))
-    const isCredit = selectedType?.name === CREDIT_TYPE_NAME
-
-    const getLimitLabel = () => {
-        if (!selectedType) return 'Daily Limit Amount'
-        return isCredit ? 'Credit Limit' : `${humanizeName(selectedType.name)} Daily Limit`
-    }
 
     const handleChange = (e) => {
         const { name, value } = e.target
 
-        if (name === 'limit') {
+        if (name === 'amount' || name === 'termMonths') {
             let numericValue = value.replace(/\D/g, '')
             numericValue = numericValue.replace(/^0+(?!$)/, '') || '0'
             setFormData((prev) => ({ ...prev, [name]: numericValue }))
@@ -64,40 +53,47 @@ export default function CardRequest() {
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-        if (!formData.brand || formData.type === '' || !formData.limit) {
+        if (formData.type === '' || !formData.amount || !formData.termMonths) {
             setError('Please fill in all fields')
             return
         }
 
-        const limit = Number(formData.limit)
-        if (Number.isNaN(limit)) {
-            setError('Please enter a valid numeric limit amount')
+        const amount = Number(formData.amount)
+        const termMonths = Number(formData.termMonths)
+
+        if (Number.isNaN(amount) || amount <= 0) {
+            setError('Please enter a valid loan amount')
             return
         }
-        if (limit < 100) {
-            setError('Please enter a valid limit amount greater than or equal to €100')
+        if (amount > 100000) {
+            setError('Maximum allowed loan amount is €100,000')
             return
         }
-        if (limit > 30000) {
-            setError('Maximum allowed limit is €30,000')
+        if (Number.isNaN(termMonths) || termMonths <= 0) {
+            setError('Please enter a valid term in months')
+            return
+        }
+        if (termMonths > 360) {
+            setError('Maximum allowed term is 360 months')
             return
         }
 
         try {
-            await requestCard.mutateAsync({
+            await requestLoan.mutateAsync({
                 type: Number(formData.type),
-                brand: Number(formData.brand),
-                creditLimit: isCredit ? limit : null,
+                amount,
+                termMonths,
             })
             setSubmitted(true)
-            setTimeout(() => navigate('/cards'), 2000)
+            setTimeout(() => navigate('/loans'), 2000)
         } catch (err) {
             const apiMessage =
                 err?.response?.data?.detail ||
                 err?.response?.data?.title ||
+                err?.response?.data?.error ||
                 err?.response?.data?.errors?.[Object.keys(err?.response?.data?.errors ?? {})[0]]?.[0] ||
                 err?.message ||
-                'Failed to submit card request'
+                'Failed to submit loan request'
             setError(apiMessage)
         }
     }
@@ -108,10 +104,10 @@ export default function CardRequest() {
                 <Card>
                     <CardContent className="text-center py-12">
                         <Typography variant="h5" className="mb-4 text-green-600">
-                            ✓ Card Request Submitted
+                            ✓ Loan Request Submitted
                         </Typography>
                         <Typography color="text.secondary" className="mb-6">
-                            Your card request has been submitted successfully. You will be redirected shortly.
+                            Your loan request has been submitted successfully. You will be redirected shortly.
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                             Redirecting in 2 seconds...
@@ -125,14 +121,14 @@ export default function CardRequest() {
     return (
         <div className="max-w-3xl mx-auto">
             <Typography variant="h5" className="mb-6">
-                Request a New Card
+                Request a New Loan
             </Typography>
 
             <Card>
                 <CardContent>
                     {optionsError && (
                         <Alert severity="error" className="mb-4">
-                            Failed to load card options. Please try again later.
+                            Failed to load loan options. Please try again later.
                         </Alert>
                     )}
 
@@ -150,30 +146,14 @@ export default function CardRequest() {
                                 required
                                 select
                                 fullWidth
-                                label="Card Brand"
-                                name="brand"
-                                value={formData.brand}
-                                onChange={handleChange}
-                                variant="outlined">
-                                {brands.map((b) => (
-                                    <MenuItem key={b.value} value={b.value}>
-                                        {humanizeName(b.name)}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
-
-                            <TextField
-                                required
-                                select
-                                fullWidth
-                                label="Card Type"
+                                label="Loan Type"
                                 name="type"
                                 value={formData.type}
                                 onChange={handleChange}
                                 variant="outlined">
                                 {types.map((t) => (
                                     <MenuItem key={t.value} value={t.value}>
-                                        {humanizeName(t.name)} Card
+                                        {humanizeName(t.name)} Loan
                                     </MenuItem>
                                 ))}
                             </TextField>
@@ -181,16 +161,29 @@ export default function CardRequest() {
                             <TextField
                                 required
                                 fullWidth
-                                label={getLimitLabel()}
-                                name="limit"
-                                placeholder="Enter desired limit"
-                                value={formData.limit}
+                                label="Loan Amount"
+                                name="amount"
+                                placeholder="Enter desired loan amount"
+                                value={formData.amount}
                                 onChange={handleChange}
                                 variant="outlined"
-                                helperText="Min €100, Max €30,000"
+                                helperText="Max €100,000"
                                 InputProps={{
                                     startAdornment: <InputAdornment position="start">€</InputAdornment>,
                                 }}
+                                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                            />
+
+                            <TextField
+                                required
+                                fullWidth
+                                label="Term (months)"
+                                name="termMonths"
+                                placeholder="e.g. 60"
+                                value={formData.termMonths}
+                                onChange={handleChange}
+                                variant="outlined"
+                                helperText="Max 360 months"
                                 inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
                             />
 
@@ -200,15 +193,15 @@ export default function CardRequest() {
                                     color="primary"
                                     type="submit"
                                     className="flex-1"
-                                    disabled={requestCard.isPending}>
-                                    {requestCard.isPending ? 'Submitting...' : 'Submit Request'}
+                                    disabled={requestLoan.isPending}>
+                                    {requestLoan.isPending ? 'Submitting...' : 'Submit Request'}
                                 </Button>
                                 <Button
                                     variant="outlined"
                                     color="secondary"
-                                    onClick={() => navigate('/')}
+                                    onClick={() => navigate('/loans')}
                                     className="flex-1"
-                                    disabled={requestCard.isPending}>
+                                    disabled={requestLoan.isPending}>
                                     Cancel
                                 </Button>
                             </Box>

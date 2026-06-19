@@ -14,10 +14,12 @@ client.interceptors.request.use((config) => {
   return config
 })
 
+const isAuthEndpoint = (url = '') => /\/auth\/(login|register)$/.test(url)
+
 client.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !isAuthEndpoint(error.config?.url)) {
       _token = null
       window.location.href = '/login'
     }
