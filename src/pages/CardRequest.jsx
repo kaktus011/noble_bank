@@ -43,11 +43,6 @@ export default function CardRequest() {
     const selectedType = types.find((t) => String(t.value) === String(formData.type))
     const isCredit = selectedType?.name === CREDIT_TYPE_NAME
 
-    const getLimitLabel = () => {
-        if (!selectedType) return 'Daily Limit Amount'
-        return isCredit ? 'Credit Limit' : `${humanizeName(selectedType.name)} Daily Limit`
-    }
-
     const handleChange = (e) => {
         const { name, value } = e.target
 
@@ -55,6 +50,14 @@ export default function CardRequest() {
             let numericValue = value.replace(/\D/g, '')
             numericValue = numericValue.replace(/^0+(?!$)/, '') || '0'
             setFormData((prev) => ({ ...prev, [name]: numericValue }))
+        } else if (name === 'type') {
+            const nextType = types.find((t) => String(t.value) === String(value))
+            const nextIsCredit = nextType?.name === CREDIT_TYPE_NAME
+            setFormData((prev) => ({
+                ...prev,
+                type: value,
+                limit: nextIsCredit ? prev.limit : '',
+            }))
         } else {
             setFormData((prev) => ({ ...prev, [name]: value }))
         }
@@ -64,30 +67,38 @@ export default function CardRequest() {
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-        if (!formData.brand || formData.type === '' || !formData.limit) {
+        if (!formData.brand || formData.type === '') {
             setError('Please fill in all fields')
             return
         }
 
-        const limit = Number(formData.limit)
-        if (Number.isNaN(limit)) {
-            setError('Please enter a valid numeric limit amount')
-            return
-        }
-        if (limit < 100) {
-            setError('Please enter a valid limit amount greater than or equal to €100')
-            return
-        }
-        if (limit > 30000) {
-            setError('Maximum allowed limit is €30,000')
-            return
+        let creditLimit = null
+        if (isCredit) {
+            if (!formData.limit) {
+                setError('Please enter a credit limit')
+                return
+            }
+            const limit = Number(formData.limit)
+            if (Number.isNaN(limit)) {
+                setError('Please enter a valid numeric limit amount')
+                return
+            }
+            if (limit < 100) {
+                setError('Please enter a valid limit amount greater than or equal to €100')
+                return
+            }
+            if (limit > 30000) {
+                setError('Maximum allowed limit is €30,000')
+                return
+            }
+            creditLimit = limit
         }
 
         try {
             await requestCard.mutateAsync({
                 type: Number(formData.type),
                 brand: Number(formData.brand),
-                creditLimit: isCredit ? limit : null,
+                creditLimit,
             })
             setSubmitted(true)
             setTimeout(() => navigate('/cards'), 2000)
@@ -178,21 +189,23 @@ export default function CardRequest() {
                                 ))}
                             </TextField>
 
-                            <TextField
-                                required
-                                fullWidth
-                                label={getLimitLabel()}
-                                name="limit"
-                                placeholder="Enter desired limit"
-                                value={formData.limit}
-                                onChange={handleChange}
-                                variant="outlined"
-                                helperText="Min €100, Max €30,000"
-                                InputProps={{
-                                    startAdornment: <InputAdornment position="start">€</InputAdornment>,
-                                }}
-                                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-                            />
+                            {isCredit && (
+                                <TextField
+                                    required
+                                    fullWidth
+                                    label="Credit Limit"
+                                    name="limit"
+                                    placeholder="Enter desired credit limit"
+                                    value={formData.limit}
+                                    onChange={handleChange}
+                                    variant="outlined"
+                                    helperText="Min €100, Max €30,000"
+                                    InputProps={{
+                                        startAdornment: <InputAdornment position="start">€</InputAdornment>,
+                                    }}
+                                    inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                                />
+                            )}
 
                             <Box className="flex gap-4 pt-4">
                                 <Button
