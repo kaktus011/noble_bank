@@ -7,6 +7,24 @@ const AuthContext = createContext(null)
 const CLEANUP_KEY = 'session_cleanup_token'
 const BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
+// API errors arrive in one of two shapes:
+//   - { error: "..." }                       (Auth controller failures)
+//   - RFC 7807 ProblemDetails { detail, errors: { Field: ["msg", ...] } }
+//     (thrown from ExceptionHandlingMiddleware, e.g. FluentValidation failures)
+// Surface all FluentValidation messages joined together so the user knows
+// exactly which rule failed.
+function extractApiErrorMessage(err, fallback) {
+  const data = err?.response?.data
+  if (!data) return err?.message || fallback
+
+  if (data.errors && typeof data.errors === 'object') {
+    const messages = Object.values(data.errors).flat().filter(Boolean)
+    if (messages.length > 0) return messages.join(' ')
+  }
+
+  return data.error || data.detail || data.title || fallback
+}
+
 export function AuthProvider({ children }) {
   const queryClient = useQueryClient()
 
@@ -89,7 +107,7 @@ export function AuthProvider({ children }) {
       if (err.response?.status === 409 && err.response?.data?.hasActiveSession) {
         return { success: false, hasActiveSession: true }
       }
-      const message = err.response?.data?.error || 'Login failed'
+      const message = extractApiErrorMessage(err, 'Login failed')
       setError(message)
       return { success: false, error: message }
     } finally {
@@ -105,7 +123,7 @@ export function AuthProvider({ children }) {
       setToken(data.token)
       return { success: true }
     } catch (err) {
-      const message = err.response?.data?.error || 'Registration failed'
+      const message = extractApiErrorMessage(err, 'Registration failed')
       setError(message)
       return { success: false, error: message }
     } finally {

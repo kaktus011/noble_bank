@@ -65,6 +65,7 @@ export default function RegisterPage() {
             value={form.password}
             onChange={handleChange}
             required
+            helperText="At least 8 characters, with an uppercase letter, a lowercase letter, a number, and a special character."
           />
           <Button
             type="submit"
